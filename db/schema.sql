@@ -1,3 +1,4 @@
+-- Limpieza de tablas si existen previamente
 DROP TABLE IF EXISTS attendance CASCADE;
 DROP TABLE IF EXISTS grades CASCADE;
 DROP TABLE IF EXISTS enrollments CASCADE;
@@ -38,15 +39,16 @@ CREATE TABLE groups (
     course_id INT NOT NULL REFERENCES courses(id),
     teacher_id INT NOT NULL REFERENCES teachers(id),
     term VARCHAR(20) NOT NULL,
+    group_code VARCHAR(10) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(course_id, teacher_id, term) 
+    UNIQUE(course_id, teacher_id, term, group_code) 
 );
 
 -- Inscripciones
 CREATE TABLE enrollments (
     id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    group_id INT NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    student_id INT NOT NULL REFERENCES students(id) ON DELETE RESTRICT,
+    group_id INT NOT NULL REFERENCES groups(id) ON DELETE RESTRICT,
     enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(student_id, group_id)
 );
@@ -54,7 +56,7 @@ CREATE TABLE enrollments (
 -- Calificaciones
 CREATE TABLE grades (
     id SERIAL PRIMARY KEY,
-    enrollment_id INT UNIQUE NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
+    enrollment_id INT UNIQUE NOT NULL REFERENCES enrollments(id) ON DELETE RESTRICT,
     partial1 DECIMAL(4,2) CHECK (partial1 >= 0 AND partial1 <= 10),
     partial2 DECIMAL(4,2) CHECK (partial2 >= 0 AND partial2 <= 10),
     final DECIMAL(4,2) CHECK (final >= 0 AND final <= 10),
@@ -64,7 +66,7 @@ CREATE TABLE grades (
 -- Asistencia
 CREATE TABLE attendance (
     id SERIAL PRIMARY KEY,
-    enrollment_id INT NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
+    enrollment_id INT NOT NULL REFERENCES enrollments(id) ON DELETE RESTRICT,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     present BOOLEAN NOT NULL DEFAULT false,
     UNIQUE(enrollment_id, date)
