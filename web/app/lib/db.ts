@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import 'server-only';
 
 // Construir connection string desde variables individuales (evita hardcodeo)
-const connectionString = process.env.POSTGRES_URL || 
+const connectionString = process.env.DATABASE_URL || 
   `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || '5432'}/${process.env.POSTGRES_DB}`;
 
 // Principio Singleton: Evita crear múltiples pools en desarrollo debido al Hot Reload de Next.js

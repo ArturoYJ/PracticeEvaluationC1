@@ -2,22 +2,24 @@ import { fetchTeacherLoad, fetchTerms } from '@/app/lib/data';
 import Link from 'next/link';
 import { Users, ArrowLeft, Filter } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import Pagination from '@/app/components/Pagination';
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Promise<{ term?: string }>;
+  searchParams?: Promise<{ term?: string; page?: string }>;
 }) {
   const terms = await fetchTerms();
   const params = await searchParams;
   const currentTerm = params?.term || terms[0];
+  const currentPage = Number(params?.page) || 1;
 
   // Redirección inteligente si no hay termino seleccionado
   if (!params?.term && terms.length > 0) {
     redirect(`/reports/2-teacher-load?term=${terms[0]}`);
   }
 
-  const teachers = await fetchTeacherLoad(currentTerm);
+  const { data: teachers, totalPages } = await fetchTeacherLoad(currentTerm, currentPage);
 
   return (
     <div className="w-full p-6">
@@ -86,6 +88,11 @@ export default async function Page({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Paginación */}
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );

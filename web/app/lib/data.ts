@@ -52,24 +52,47 @@ export async function fetchCoursePerformance(term: string): Promise<CoursePerfor
   }
 }
 
-// 2. CARGA DOCENTE
-export async function fetchTeacherLoad(term: string): Promise<TeacherLoad[]> {
+// 2. CARGA DOCENTE (Con Paginación)
+export async function fetchTeacherLoad(
+  term: string,
+  currentPage: number
+): Promise<{ data: TeacherLoad[], totalPages: number }> {
   noStore();
   
-  if (!TermSchema.safeParse(term).success) return [];
+  if (!TermSchema.safeParse(term).success) return { data: [], totalPages: 0 };
+
+  const page = PaginationSchema.safeParse(currentPage).success ? currentPage : 1;
+  const offset = (page - 1) * ITEMS_PER_PAGE;
 
   try {
-    const result = await query(
-      `SELECT * FROM vw_teacher_load WHERE term = $1 ORDER BY total_students_served DESC`,
+    // 1. Data Paginada
+    const dataPromise = query(
+      `SELECT * FROM vw_teacher_load 
+       WHERE term = $1 
+       ORDER BY total_students_served DESC
+       LIMIT $2 OFFSET $3`,
+      [term, ITEMS_PER_PAGE, offset]
+    );
+
+    // 2. Conteo Total (para paginación)
+    const countPromise = query(
+      `SELECT COUNT(*) FROM vw_teacher_load WHERE term = $1`,
       [term]
     );
 
-    return result.rows.map(row => ({
+    const [dataResult, countResult] = await Promise.all([dataPromise, countPromise]);
+
+    const totalItems = Number(countResult.rows[0].count);
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+    const data = dataResult.rows.map(row => ({
       ...row,
       active_groups: Number(row.active_groups),
       total_students_served: Number(row.total_students_served),
       avg_grading_strictness: Number(row.avg_grading_strictness),
     }));
+
+    return { data, totalPages };
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Error al cargar carga docente.');

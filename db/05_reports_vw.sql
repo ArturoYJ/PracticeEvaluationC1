@@ -10,6 +10,7 @@ DROP VIEW IF EXISTS vw_course_performance;
 -- Grain: 1 fila por Curso y Periodo.
 -- Métricas: Total alumnos, Promedio de notas, Tasa de reprobación.
 -- Requisito cumplido: CASE , HAVING 
+-- VERIFY: SELECT * FROM vw_course_performance WHERE failure_rate > 20; 
 CREATE VIEW vw_course_performance AS
 SELECT 
     c.name AS course_name,
@@ -35,6 +36,7 @@ HAVING COUNT(e.id) > 0;
 -- Descripción: Muestra qué tan cargado está un docente de trabajo.
 -- Grain: 1 fila por Docente y Periodo.
 -- Requisito cumplido: HAVING 
+-- VERIFY: SELECT * FROM vw_teacher_load WHERE avg_grading_strictness < 7; 
 CREATE VIEW vw_teacher_load AS
 SELECT 
     t.name as teacher_name,
@@ -55,6 +57,7 @@ HAVING COUNT(e.id) > 0; -- REQUISITO HAVING #2: Solo docentes activos
 -- Descripción: Identifica alumnos con problemas de notas o asistencia.
 -- Grain: 1 fila por Alumno en Riesgo.
 -- Requisito cumplido: CTE 
+-- VERIFY: SELECT * FROM vw_students_at_risk WHERE risk_reason LIKE 'CRÍTICO%'; 
 CREATE VIEW vw_students_at_risk AS
 WITH StudentStats AS (
     -- CTE: Pre-cálculo de métricas crudas
@@ -92,6 +95,7 @@ WHERE final_grade < 6 OR attendance_pct < 75;
 -- Descripción: Resumen de asistencia promedio por grupo.
 -- Grain: 1 fila por Grupo.
 -- Requisito cumplido: COALESCE/CASE significativo 
+-- VERIFY: SELECT * FROM vw_attendance_by_group WHERE group_attendance_rate < 80; 
 CREATE VIEW vw_attendance_by_group AS
 SELECT 
     c.name as course,
@@ -119,6 +123,7 @@ GROUP BY g.id, c.name, t.name, g.term;
 -- Descripción: Ranking de mejores promedios por carrera.
 -- Grain: 1 fila por Estudiante.
 -- Requisito cumplido: Window Function (DENSE_RANK) 
+-- VERIFY: SELECT * FROM vw_rank_students WHERE ranking_in_program <= 3; 
 CREATE VIEW vw_rank_students AS
 SELECT 
     s.program,
