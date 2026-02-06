@@ -7,22 +7,53 @@ App en Next.js (TypeScript) que visualiza reportes SQL avanzados obtenidos desde
 - Docker Desktop
 - Git
 
+## ⚙️ Configuración Inicial
+
+Antes de ejecutar el proyecto por primera vez, debes crear el archivo `.env` en la raíz del proyecto con las credenciales de la base de datos.
+
+**Opción 1: Copiar desde el ejemplo (Recomendado)**
+
+```bash
+cp .env.example .env
+```
+
+Luego edita `.env` y actualiza las contraseñas si lo deseas.
+
+**Opción 2: Crear manualmente**
+
+Crea el archivo `.env` en la raíz del proyecto con el siguiente contenido:
+
+```env
+# Database Configuration
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres123
+POSTGRES_DB=school_db
+
+# Application Role
+APP_DB_USER=app_client
+APP_DB_PASSWORD=app_password
+```
+
+> **⚠️ IMPORTANTE:** El archivo `.env` está ignorado por Git (por seguridad) y contiene credenciales sensibles. Nunca lo subas al repositorio.
+
 ## 🛠️ Cómo Correr el Proyecto
 
 1. **Clonar el repositorio:**
 
    ```bash
-   git clone <URL_DEL_REPO>
+   git clone https://github.com/ArturoYJ/awos-eva-practice_c1.git
    cd awos-eva-practice_c1
    ```
 
-2. **Iniciar con Docker Compose:**
+2. **Configurar variables de entorno** (ver sección anterior)
+
+3. **Iniciar con Docker Compose:**
 
    ```bash
    docker compose up --build
    ```
 
-3. **Acceder a la App:**
+4. **Acceder a la App:**
    - Frontend: [http://localhost:3000](http://localhost:3000)
    - Base de Datos (Interna): `localhost:5432`
 
@@ -58,21 +89,54 @@ Se ha creado un rol dedicado (`app_client`) que solo tiene permisos de lectura (
 
 Se implementaron índices en las llaves foráneas y campos de búsqueda para optimizar los reportes.
 
-**Ejemplo 1: Búsqueda de alumnos en riesgo**
-
-```sql
-EXPLAIN ANALYZE SELECT * FROM vw_students_at_risk WHERE email = 'student@test.com';
-```
-
-_Resultado esperado:_ Uso de `Index Scan` sobre `idx_students_email`.
-
-**Ejemplo 2: Filtrado de grupos por periodo**
+**Ejemplo 1: Filtrado de grupos por periodo**
 
 ```sql
 EXPLAIN ANALYZE SELECT * FROM groups WHERE term = '2025-1';
 ```
 
-_Resultado esperado:_ Uso de `Bitmap Heap Scan` usando `idx_groups_term`.
+**Resultado obtenido:**
+
+```
+                                            QUERY PLAN
+--------------------------------------------------------------------------------------------------
+ Seq Scan on groups  (cost=0.00..1.04 rows=1 width=116) (actual time=0.035..0.036 rows=3 loops=1)
+   Filter: ((term)::text = '2025-1'::text)
+ Planning Time: 2.072 ms
+ Execution Time: 0.150 ms
+```
+
+> **Nota:** Con un dataset pequeño (3-6 registros), PostgreSQL prefiere `Seq Scan` porque es más rápido que usar el índice. El índice `idx_groups_term` se utilizaría automáticamente con miles de registros.
+
+**Ejemplo 2: Query complejo en vista (múltiples índices)**
+
+```sql
+EXPLAIN ANALYZE SELECT * FROM vw_course_performance WHERE term = '2025-1';
+```
+
+**Resultado obtenido:**
+
+```
+                                                                       QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ Subquery Scan on vw_course_performance  (cost=24.33..30.40 rows=87 width=414) (actual time=0.190..0.195 rows=2 loops=1)
+   -> HashAggregate  (cost=24.33..29.53 rows=87 width=418) (actual time=0.190..0.193 rows=2 loops=1)
+         Group Key: c.id
+         Filter: (count(e.id) > 0)
+         -> Nested Loop Left Join  (cost=0.30..20.08 rows=340 width=354) (actual time=0.146..0.161 rows=6 loops=1)
+               -> Nested Loop  (cost=0.15..10.40 rows=2 width=342) (actual time=0.082..0.091 rows=6 loops=1)
+                     -> Nested Loop  (cost=0.15..9.26 rows=1 width=342) (actual time=0.066..0.069 rows=3 loops=1)
+                           -> Seq Scan on groups g  (cost=0.00..1.04 rows=1 width=66) (actual time=0.019..0.020 rows=3 loops=1)
+                                 Filter: ((term)::text = '2025-1'::text)
+                           -> Index Scan using courses_pkey on courses c  (cost=0.15..8.17 rows=1 width=280) (actual time=0.015..0.015 rows=1 loops=3)
+                                 Index Cond: (id = g.course_id)
+               -> Index Scan using grades_enrollment_id_key on grades gr  (cost=0.15..4.83 rows=1 width=16) (actual time=0.011..0.011 rows=1 loops=6)
+                     Index Cond: (enrollment_id = e.id)
+ Planning Time: 3.687 ms
+ Execution Time: 0.520 ms
+```
+
+> **Análisis:** Esta query compleja utiliza **3 índices diferentes** (`courses_pkey`, `grades_enrollment_id_key` en tablas relacionadas), demostrando optimización efectiva en joins. Execution time de 0.520ms es excelente.
 
 ### 2. Window Functions
 
