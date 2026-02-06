@@ -45,7 +45,8 @@ cd PracticeEvaluationC1
 
 ### Paso 2: Configurar variables de entorno
 
-Crea el archivo `.env` en la **raíz del proyecto** (donde está `docker-compose.yml`).
+Crea el archivo `.env` en la **raíz del proyecto** (donde está `docker-compose.yml`) y ponle la contraseña de postgres.
+Y el archivo `.env.example` cambiarle el nombre a `.env.local` en la carpeta `web` y ponle la contraseña de postgres.
 
 **Opción A: Copiar desde plantilla (Recomendado)**
 
@@ -61,11 +62,11 @@ Si no existe `.env.example`, crea el archivo `.env` con este contenido:
 # Database Configuration
 POSTGRES_USER=your_user
 POSTGRES_PASSWORD=your_password
-POSTGRES_DB=your_db
+POSTGRES_DB=school_db
 
 # Application Role
-APP_DB_USER=your_user
-APP_DB_PASSWORD=your_password
+APP_DB_USER=app_client
+APP_DB_PASSWORD=app_password
 ```
 
 ### Paso 3: Iniciar con Docker Compose
