@@ -19,3 +19,8 @@ GRANT SELECT ON vw_students_at_risk TO :app_db_user;
 GRANT SELECT ON vw_attendance_by_group TO :app_db_user;
 GRANT SELECT ON vw_rank_students TO :app_db_user;
 GRANT SELECT ON vw_courses_summary TO :app_db_user;
+
+-- CRITICAL: Permisos adicionales para helpers de filtros
+-- fetchTerms() lee de groups, fetchPrograms() lee de students
+GRANT SELECT ON groups TO :app_db_user;
+GRANT SELECT ON students TO :app_db_user;
