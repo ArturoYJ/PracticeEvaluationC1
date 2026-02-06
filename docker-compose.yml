@@ -20,5 +20,20 @@ services:
       timeout: 5s
       retries: 5
 
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: school_web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://${APP_DB_USER}:${APP_DB_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+
