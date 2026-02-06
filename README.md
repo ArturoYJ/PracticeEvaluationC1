@@ -2,12 +2,12 @@
 
 App en Next.js (TypeScript) que visualiza reportes SQL avanzados obtenidos desde VIEWS en PostgreSQL, corriendo sobre Docker con seguridad implementada.
 
-## 🚀 Requisitos Previos
+## Requisitos Previos
 
 - Docker Desktop
 - Git
 
-## ⚙️ Configuración Inicial
+## Configuración Inicial
 
 Antes de ejecutar el proyecto por primera vez, debes crear el archivo `.env` en la raíz del proyecto con las credenciales de la base de datos.
 
@@ -34,15 +34,13 @@ APP_DB_USER=app_client
 APP_DB_PASSWORD=app_password
 ```
 
-> **⚠️ IMPORTANTE:** El archivo `.env` está ignorado por Git (por seguridad) y contiene credenciales sensibles. Nunca lo subas al repositorio.
-
-## 🛠️ Cómo Correr el Proyecto
+## Cómo Correr el Proyecto
 
 1. **Clonar el repositorio:**
 
    ```bash
-   git clone https://github.com/ArturoYJ/awos-eva-practice_c1.git
-   cd awos-eva-practice_c1
+   git clone https://github.com/ArturoYJ/PracticeEvaluationC1.git
+   cd PracticeEvaluationC1
    ```
 
 2. **Configurar variables de entorno** (ver sección anterior)
@@ -50,6 +48,7 @@ APP_DB_PASSWORD=app_password
 3. **Iniciar con Docker Compose:**
 
    ```bash
+   docker compose down -v
    docker compose up --build
    ```
 
@@ -59,7 +58,7 @@ APP_DB_PASSWORD=app_password
 
 ---
 
-## 🔒 Evidencia de Seguridad
+## Evidencia de Seguridad
 
 El proyecto cumple con la "Regla de Oro": la aplicación **NO** se conecta como `postgres`.
 Se ha creado un rol dedicado (`app_client`) que solo tiene permisos de lectura (`SELECT`) sobre las Vistas (`VIEWS`), y **ningún acceso** a las tablas físicas.
@@ -83,7 +82,7 @@ Se ha creado un rol dedicado (`app_client`) que solo tiene permisos de lectura (
 
 ---
 
-## 📊 Evidencia de Base de Datos y Performance
+## Evidencia de Base de Datos y Performance
 
 ### 1. Índices y EXPLAIN
 
@@ -151,7 +150,7 @@ Se utilizó `DENSE_RANK()` en la vista `vw_rank_students` para generar un rankin
 
 ---
 
-## 📝 Trade-offs y Decisiones de Diseño
+## Trade-offs y Decisiones de Diseño
 
 1.  **CTE vs Subqueries en `vw_students_at_risk`**:
     - _Decisión:_ Se usó un CTE (`WITH StudentStats`) para calcular primero los promedios "crudos" y luego aplicar las reglas de negocio (CASE) en el SELECT principal.
