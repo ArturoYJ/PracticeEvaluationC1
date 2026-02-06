@@ -26,7 +26,7 @@ Crea el archivo `.env` en la raíz del proyecto con el siguiente contenido:
 ```env
 # Database Configuration
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres123
+POSTGRES_PASSWORD=your_password
 POSTGRES_DB=school_db
 
 # Application Role
