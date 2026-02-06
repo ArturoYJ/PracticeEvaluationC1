@@ -36,25 +36,55 @@ APP_DB_PASSWORD=app_password
 
 ## Cómo Correr el Proyecto
 
-1. **Clonar el repositorio:**
+### Paso 1: Clonar el repositorio
 
-   ```bash
-   git clone https://github.com/ArturoYJ/PracticeEvaluationC1.git
-   cd PracticeEvaluationC1
-   ```
+```bash
+git clone https://github.com/ArturoYJ/PracticeEvaluationC1.git
+cd PracticeEvaluationC1
+```
 
-2. **Configurar variables de entorno** (ver sección anterior)
+### Paso 2: Configurar variables de entorno
 
-3. **Iniciar con Docker Compose:**
+Crea el archivo `.env` en la **raíz del proyecto** (donde está `docker-compose.yml`).
 
-   ```bash
-   docker compose down -v
-   docker compose up --build
-   ```
+**Opción A: Copiar desde plantilla (Recomendado)**
 
-4. **Acceder a la App:**
-   - Frontend: [http://localhost:3000](http://localhost:3000)
-   - Base de Datos (Interna): `localhost:5432`
+```bash
+cp .env.example .env
+```
+
+**Opción B: Crear manualmente**
+
+Si no existe `.env.example`, crea el archivo `.env` con este contenido:
+
+```env
+# Database Configuration
+POSTGRES_USER=your_user
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=your_db
+
+# Application Role
+APP_DB_USER=your_user
+APP_DB_PASSWORD=your_password
+```
+
+### Paso 3: Iniciar con Docker Compose
+
+```bash
+docker compose up --build
+```
+
+> **Nota:** Si ya habías ejecutado el proyecto antes y quieres empezar desde cero:
+>
+> ```bash
+> docker compose down -v
+> docker compose up --build
+> ```
+
+### Paso 4: Acceder a la aplicación
+
+- **Frontend:** [http://localhost:3000](http://localhost:3000)
+- **Base de Datos:** `localhost:5432` (acceso interno para debugging)
 
 ---
 
