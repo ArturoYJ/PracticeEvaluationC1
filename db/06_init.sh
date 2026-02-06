@@ -13,7 +13,7 @@ if [ "$ROLE_EXISTS" != "1" ]; then
         -v app_db_user="$APP_DB_USER" \
         -v app_db_password="$APP_DB_PASSWORD" \
         -v postgres_db="$POSTGRES_DB" \
-        -f /docker-entrypoint-initdb.d/04_roles.sql.template
+        -f /docker-entrypoint-initdb.d/99_roles.sql.template
     echo "Roles creados exitosamente."
 else
     echo "El rol $APP_DB_USER ya existe, saltando creacion."
